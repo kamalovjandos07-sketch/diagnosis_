@@ -56,7 +56,7 @@ MEDICAL_KNOWLEDGE_BASE = {
     "urinary_tract_infection": {
         "diagnosis_criteria": ["Дизурия", "Учащенное мочеиспускание", "Лихорадка >38°C", "Лейкоциты в моче", "Положительный нитритный тест"],
         "required_criteria": 2,
-        "antibiotic_choice": "Цефтриаксон 1 г/сут в/м × 7 дней",
+        "antibiotic_choice": "Цефтриакson 1 г/сут в/м × 7 дней",
         "source": "IDSA UTI Guidelines 2022"
     },
     "acute_bronchitis": {
@@ -321,10 +321,6 @@ def main():
         - Дифференциальной диагностике
         - Клиническому мышлению
         - Принципам доказательной медицины
-        """)
-
-if __name__ == "__main__":
-    main()
         """)
 
 if __name__ == "__main__":
