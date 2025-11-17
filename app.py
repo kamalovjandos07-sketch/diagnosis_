@@ -256,7 +256,7 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
 
 # ОСНОВНОЙ ИНТЕРФЕЙС
 def main():
-    st.title("Medical Diagnostic System")
+    st.title("Медицинский справочник KazNMU")
     st.markdown("**Комплексная система диагностики и рекомендаций по лечению**")
     
     # ВВОД ДАННЫХ
