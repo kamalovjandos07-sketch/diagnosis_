@@ -251,7 +251,7 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
 
 # 🎯 ОСНОВНОЙ ИНТЕРФЕЙС
 def main():
-    st.title("🩺 Medical Diagnostic System")
+    st.title("🩺 Медицинский справочник для студентов")
     st.markdown("**Комплексная система диагностики и рекомендаций по лечению**")
     
     # 📝 ВВОД ДАННЫХ
@@ -310,19 +310,19 @@ def main():
             
             # 📊 РЕЗУЛЬТАТЫ
             st.markdown("---")
-            st.subheader("🔍 Результаты диагностики")
+            st.subheader("Результаты диагностики")
             
             # Основной диагноз
             diagnosis_info = MEDICAL_KNOWLEDGE_BASE[main_diagnosis]
             diagnosis_name = main_diagnosis.replace('_', ' ').title()
             
-            st.success(f"## 🎯 Основной диагноз: {diagnosis_name}")
+            st.success(f"## Основной диагноз: {diagnosis_name}")
             st.write(f"**Баллы диагностики:** {all_diagnoses[0][1]}/10")
             st.write(f"**Источник рекомендаций:** {diagnosis_info['source']}")
             
             # 🔥 КРИТИЧЕСКИЕ СОСТОЯНИЯ
             if main_diagnosis == "hypertensive_crisis":
-                st.error("## 🚨 КРИТИЧЕСКОЕ СОСТОЯНИЕ!")
+                st.error("## КРИТИЧЕСКОЕ СОСТОЯНИЕ!")
                 st.markdown('<div class="warning-box">', unsafe_allow_html=True)
                 st.write("**НЕОБХОДИМО:**")
                 st.write("1. Немедленный вызов скорой помощи")
@@ -331,72 +331,72 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
             
             # 💊 ЛЕЧЕНИЕ
-            st.subheader("💊 Рекомендации по лечению")
+            st.subheader("Рекомендации по лечению")
             
             treatments = diagnosis_info["treatments"]
             
             if "antibiotics" in treatments:
-                st.markdown("#### 💊 Антибактериальная терапия:")
+                st.markdown("#### Антибактериальная терапия:")
                 for med in treatments["antibiotics"]:
                     st.write(f"- {med}")
             
             if "antivirals" in treatments:
-                st.markdown("#### 🦠 Противовирусная терапия:")
+                st.markdown("#### Противовирусная терапия:")
                 for med in treatments["antivirals"]:
                     st.write(f"- {med}")
             
             if "antihistamines" in treatments:
-                st.markdown("#### 🌸 Антигистаминные препараты:")
+                st.markdown("#### Антигистаминные препараты:")
                 for med in treatments["antihistamines"]:
                     st.write(f"- {med}")
             
             if "rehydration" in treatments:
-                st.markdown("#### 💧 Регидратация:")
+                st.markdown("#### Регидратация:")
                 for med in treatments["rehydration"]:
                     st.write(f"- {med}")
             
             if "emergency" in treatments:
-                st.markdown("#### 🚨 Неотложная помощь:")
+                st.markdown("#### Неотложная помощь:")
                 for action in treatments["emergency"]:
                     st.write(f"- {action}")
             
             if "acute" in treatments:
-                st.markdown("#### 💊 Купирование острого приступа:")
+                st.markdown("#### Купирование острого приступа:")
                 for med in treatments["acute"]:
                     st.write(f"- {med}")
             
-            st.markdown("#### 🌿 Симптоматическое лечение:")
+            st.markdown("#### Симптоматическое лечение:")
             if "symptomatic" in treatments:
                 for med in treatments["symptomatic"]:
                     st.write(f"- {med}")
             
-            st.markdown("#### 🏠 Вспомогательная терапия:")
+            st.markdown("#### Вспомогательная терапия:")
             if "supportive" in treatments:
                 for action in treatments["supportive"]:
                     st.write(f"- {action}")
             
             if "diet" in treatments:
-                st.markdown("#### 🍽 Диетические рекомендации:")
+                st.markdown("#### Диетические рекомендации:")
                 for item in treatments["diet"]:
                     st.write(f"- {item}")
             
             if "nasal" in treatments:
-                st.markdown("#### 👃 Назальная терапия:")
+                st.markdown("#### Назальная терапия:")
                 for med in treatments["nasal"]:
                     st.write(f"- {med}")
             
             if "avoidance" in treatments:
-                st.markdown("#### 🚫 Элиминационные мероприятия:")
+                st.markdown("#### Элиминационные мероприятия:")
                 for action in treatments["avoidance"]:
                     st.write(f"- {action}")
             
             # 📍 НАПРАВЛЕНИЯ
-            st.markdown("#### 📍 Дальнейшие действия:")
+            st.markdown("#### Дальнейшие действия:")
             st.info(diagnosis_info["referral"])
             
             # 📈 ДИФФЕРЕНЦИАЛЬНАЯ ДИАГНОСТИКА
             st.markdown("---")
-            st.subheader("🔍 Дифференциальная диагностика")
+            st.subheader("Дифференциальная диагностика")
             
             for i, (diagnosis, score) in enumerate(all_diagnoses[1:4], 1):
                 diag_name = diagnosis.replace('_', ' ').title()
