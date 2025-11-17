@@ -36,7 +36,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 🏥 РАСШИРЕННАЯ БАЗА ЗАБОЛЕВАНИЙ И ЛЕЧЕНИЯ
+# БАЗА ЗАБОЛЕВАНИЙ И ЛЕЧЕНИЯ
 MEDICAL_KNOWLEDGE_BASE = {
     "community_acquired_pneumonia": {
         "diagnosis_criteria": ["Лихорадка >38°C", "Кашель", "Одышка", "Боль в груди", "Лейкоцитоз", "Повышение СРБ"],
@@ -146,8 +146,8 @@ MEDICAL_KNOWLEDGE_BASE = {
     }
 }
 
-# 🔍 ДИАГНОСТИЧЕСКАЯ СИСТЕМА
-def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_systolic, bp_diastolic):
+# ДИАГНОСТИЧЕСКАЯ СИСТЕМА
+def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_systolic, bp_diastolic, wbc, crp):
     """
     Умная диагностическая система на основе баллов
     """
@@ -158,14 +158,19 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
         if any(symptom in ["Головная боль", "Тошнота", "Нарушение зрения", "Одышка", "Боль в груди"] for symptom in symptoms):
             return "hypertensive_crisis", 10
     
+    # Определяем лабораторные показатели
+    has_leukocytosis = "Лейкоцитоз" in lab_data or wbc > 10.0
+    has_elevated_crp = "Повышение СРБ" in lab_data or crp > 5.0
+    has_urinary_leuko = "Лейкоциты в моче" in lab_data
+    
     # Пневмония
     pneumonia_score = sum([
         2 if "Лихорадка >38°C" in symptoms and temperature > 38 else 0,
         2 if "Кашель с мокротой" in symptoms else 1 if "Кашель" in symptoms else 0,
         2 if "Одышка" in symptoms else 0,
         2 if "Боль в груди" in symptoms else 0,
-        2 if "Лейкоцитоз" in lab_data else 0,
-        2 if "Повышение СРБ" in lab_data else 0
+        2 if has_leukocytosis else 0,
+        2 if has_elevated_crp else 0
     ])
     symptom_score["community_acquired_pneumonia"] = pneumonia_score
     
@@ -185,7 +190,7 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
         3 if "Дизурия" in symptoms else 0,
         2 if "Учащенное мочеиспускание" in symptoms else 0,
         2 if "Боль в надлобковой области" in symptoms else 0,
-        2 if "Лейкоциты в моче" in lab_data else 0,
+        2 if has_urinary_leuko else 0,
         2 if "Лихорадка >38°C" in symptoms and temperature > 38 else 0
     ])
     symptom_score["urinary_tract_infection"] = uti_score
@@ -196,7 +201,7 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
         2 if "Кашель с мокротой" in symptoms else 0,
         -2 if "Лихорадка >38°C" in symptoms and temperature > 38 else 1,
         -2 if "Одышка" in symptoms else 1,
-        -2 if "Лейкоцитоз" in lab_data else 1,
+        -2 if has_leukocytosis else 1,
         1 if "Слабость" in symptoms else 0
     ])
     symptom_score["acute_bronchitis"] = bronchitis_score
@@ -249,12 +254,12 @@ def medical_diagnosis_system(symptoms, lab_data, vital_signs, temperature, bp_sy
     
     return sorted_diagnoses[0][0], sorted_diagnoses
 
-# 🎯 ОСНОВНОЙ ИНТЕРФЕЙС
+# ОСНОВНОЙ ИНТЕРФЕЙС
 def main():
-    st.title("🩺 Медицинский справочник для студентов KazNMU")
+    st.title("Medical Diagnostic System")
     st.markdown("**Комплексная система диагностики и рекомендаций по лечению**")
     
-    # 📝 ВВОД ДАННЫХ
+    # ВВОД ДАННЫХ
     col1, col2 = st.columns(2)
     
     with col1:
@@ -278,13 +283,18 @@ def main():
         temperature = st.slider("Температура тела (°C):", 35.0, 42.0, 37.0, 0.1)
         
     with col2:
-        st.subheader("Данные обследования")
+        st.subheader("Лабораторные показатели")
+        
+        wbc = st.number_input("Лейкоциты (×10⁹/л):", min_value=1.0, max_value=50.0, value=6.0, step=0.1,
+                             help="Норма: 4.0-9.0 ×10⁹/л")
+        
+        crp = st.number_input("СРБ (мг/л):", min_value=0.0, max_value=200.0, value=2.0, step=0.1,
+                             help="Норма: <5 мг/л")
         
         lab_data = st.multiselect(
-            "Результаты анализов:",
+            "Другие результаты анализов:",
             [
-                "Лейкоцитоз", "Повышение СРБ", "Лейкоциты в моче", 
-                "Нитриты в моче", "Анализы в норме"
+                "Лейкоциты в моче", "Нитриты в моче", "Анализы в норме"
             ]
         )
         
@@ -295,20 +305,20 @@ def main():
         with bp_col2:
             bp_diastolic = st.number_input("Диастолическое (мм рт.ст.):", 50, 150, 80)
     
-    # 🔍 ДИАГНОСТИКА
-    if st.button("🎯 Провести диагностику", type="primary"):
+    # ДИАГНОСТИКА
+    if st.button("Провести диагностику", type="primary"):
         if not symptoms:
             st.warning("Пожалуйста, введите симптомы пациента")
             return
             
-        with st.spinner("🔍 Провожу анализ симптомов..."):
+        with st.spinner("Провожу анализ симптомов..."):
             # Диагностика
             vital_signs = f"Температура: {temperature}°C, АД: {bp_systolic}/{bp_diastolic} мм рт.ст."
             main_diagnosis, all_diagnoses = medical_diagnosis_system(
-                symptoms, lab_data, vital_signs, temperature, bp_systolic, bp_diastolic
+                symptoms, lab_data, vital_signs, temperature, bp_systolic, bp_diastolic, wbc, crp
             )
             
-            # 📊 РЕЗУЛЬТАТЫ
+            # РЕЗУЛЬТАТЫ
             st.markdown("---")
             st.subheader("Результаты диагностики")
             
@@ -316,96 +326,96 @@ def main():
             diagnosis_info = MEDICAL_KNOWLEDGE_BASE[main_diagnosis]
             diagnosis_name = main_diagnosis.replace('_', ' ').title()
             
-            st.success(f"## Основной диагноз: {diagnosis_name}")
-            st.write(f"**Баллы диагностики:** {all_diagnoses[0][1]}/10")
-            st.write(f"**Источник рекомендаций:** {diagnosis_info['source']}")
+            st.success(f"Основной диагноз: {diagnosis_name}")
+            st.write(f"Баллы диагностики: {all_diagnoses[0][1]}/10")
+            st.write(f"Источник рекомендаций: {diagnosis_info['source']}")
             
-            # 🔥 КРИТИЧЕСКИЕ СОСТОЯНИЯ
+            # КРИТИЧЕСКИЕ СОСТОЯНИЯ
             if main_diagnosis == "hypertensive_crisis":
-                st.error("## КРИТИЧЕСКОЕ СОСТОЯНИЕ!")
+                st.error("КРИТИЧЕСКОЕ СОСТОЯНИЕ!")
                 st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                st.write("**НЕОБХОДИМО:**")
+                st.write("НЕОБХОДИМО:")
                 st.write("1. Немедленный вызов скорой помощи")
                 st.write("2. Контроль АД каждые 15 минут")
                 st.write("3. Покой, полусидячее положение")
                 st.markdown('</div>', unsafe_allow_html=True)
             
-            # 💊 ЛЕЧЕНИЕ
+            # ЛЕЧЕНИЕ
             st.subheader("Рекомендации по лечению")
             
             treatments = diagnosis_info["treatments"]
             
             if "antibiotics" in treatments:
-                st.markdown("#### Антибактериальная терапия:")
+                st.markdown("**Антибактериальная терапия:**")
                 for med in treatments["antibiotics"]:
                     st.write(f"- {med}")
             
             if "antivirals" in treatments:
-                st.markdown("#### Противовирусная терапия:")
+                st.markdown("**Противовирусная терапия:**")
                 for med in treatments["antivirals"]:
                     st.write(f"- {med}")
             
             if "antihistamines" in treatments:
-                st.markdown("#### Антигистаминные препараты:")
+                st.markdown("**Антигистаминные препараты:**")
                 for med in treatments["antihistamines"]:
                     st.write(f"- {med}")
             
             if "rehydration" in treatments:
-                st.markdown("#### Регидратация:")
+                st.markdown("**Регидратация:**")
                 for med in treatments["rehydration"]:
                     st.write(f"- {med}")
             
             if "emergency" in treatments:
-                st.markdown("#### Неотложная помощь:")
+                st.markdown("**Неотложная помощь:**")
                 for action in treatments["emergency"]:
                     st.write(f"- {action}")
             
             if "acute" in treatments:
-                st.markdown("#### Купирование острого приступа:")
+                st.markdown("**Купирование острого приступа:**")
                 for med in treatments["acute"]:
                     st.write(f"- {med}")
             
-            st.markdown("#### Симптоматическое лечение:")
+            st.markdown("**Симптоматическое лечение:**")
             if "symptomatic" in treatments:
                 for med in treatments["symptomatic"]:
                     st.write(f"- {med}")
             
-            st.markdown("#### Вспомогательная терапия:")
+            st.markdown("**Вспомогательная терапия:**")
             if "supportive" in treatments:
                 for action in treatments["supportive"]:
                     st.write(f"- {action}")
             
             if "diet" in treatments:
-                st.markdown("#### Диетические рекомендации:")
+                st.markdown("**Диетические рекомендации:**")
                 for item in treatments["diet"]:
                     st.write(f"- {item}")
             
             if "nasal" in treatments:
-                st.markdown("#### Назальная терапия:")
+                st.markdown("**Назальная терапия:**")
                 for med in treatments["nasal"]:
                     st.write(f"- {med}")
             
             if "avoidance" in treatments:
-                st.markdown("#### Элиминационные мероприятия:")
+                st.markdown("**Элиминационные мероприятия:**")
                 for action in treatments["avoidance"]:
                     st.write(f"- {action}")
             
-            # 📍 НАПРАВЛЕНИЯ
-            st.markdown("#### Дальнейшие действия:")
+            # НАПРАВЛЕНИЯ
+            st.markdown("**Дальнейшие действия:**")
             st.info(diagnosis_info["referral"])
             
-            # 📈 ДИФФЕРЕНЦИАЛЬНАЯ ДИАГНОСТИКА
+            # ДИФФЕРЕНЦИАЛЬНАЯ ДИАГНОСТИКА
             st.markdown("---")
             st.subheader("Дифференциальная диагностика")
             
             for i, (diagnosis, score) in enumerate(all_diagnoses[1:4], 1):
                 diag_name = diagnosis.replace('_', ' ').title()
-                st.write(f"{i}. **{diag_name}** ({score} баллов)")
+                st.write(f"{i}. {diag_name} ({score} баллов)")
     
-    # 📚 ИНФОРМАЦИЯ О СИСТЕМЕ
+    # ИНФОРМАЦИЯ О СИСТЕМЕ
     with st.sidebar:
         st.markdown("---")
-        st.subheader("📖 О системе")
+        st.subheader("О системе")
         st.markdown("""
         **Диагностируемые состояния:**
         - Пневмония
@@ -422,7 +432,7 @@ def main():
         """)
         
         st.markdown("---")
-        st.subheader("⚠️ Важно!")
+        st.subheader("Важно!")
         st.markdown("""
         Данная система предназначена для образовательных целей и не заменяет консультацию врача.
         
